@@ -33,7 +33,7 @@ class SerSoc(port: Int) {
 
 }
 
-class Soc(host: String?, port: Int) : Socket(host, port) {
+class Soc(host: String?, port: Int) {
 
     init{
         var s = Socket(host, port)
