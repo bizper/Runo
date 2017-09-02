@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
     l.record(Level.WARNING, "this is a test")
     l.record(Level.NORMAL, "this is a test")
     l.record(Level.ERROR, "this is a test")
-    l.close()
+    l.end()
 }
 
 class Log {
@@ -58,7 +58,7 @@ class Log {
         fw?.append(String.format(model, l.name, sf.format(Date()), state))
     }
 
-    fun close() {
+    fun end() {
         fw?.flush()
         fw?.close()
     }
