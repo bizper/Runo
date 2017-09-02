@@ -5,14 +5,6 @@ import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
-fun main(args: Array<String>) {
-    var l = Log(Log.SIMPLE)
-    l.record(Level.WARNING, "this is a test")
-    l.record(Level.NORMAL, "this is a test")
-    l.record(Level.ERROR, "this is a test")
-    l.end()
-}
-
 class Log {
 
     companion object {
@@ -56,6 +48,7 @@ class Log {
 
     fun record(l: Level, state: String) {
         fw?.append(String.format(model, l.name, sf.format(Date()), state))
+        fw?.flush()
     }
 
     fun end() {
