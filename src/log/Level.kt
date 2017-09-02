@@ -1,7 +1,8 @@
 package log
 
 enum class Level {
-    NORMAL,
+    WARNING,
     ERROR,
-    WARNING
+    NORMAL
+
 }
