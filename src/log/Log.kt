@@ -12,17 +12,16 @@ class Log {
         val SIMPLE = 0x0b
     }
 
-    private val model = "%s:[%s] %s\n"
     private val default_format = "z E a hh:mm:ss:SS"
-    private val default_simple_format = "HH:mm:ss"
+    private val default_simple_format = "HH:mm:ss:SS"
     private val filename_format = "yyyy-MM-dd"
     private var sf: SimpleDateFormat = SimpleDateFormat(filename_format)
 
-    private var f: File = File(String.format("./src/log/%s.txt", sf.format(Date())))
+    private var f: File = File("./src/log/${sf.format(Date())}.txt")
     private var fw: FileWriter? = null
 
     constructor() {
-        sf = SimpleDateFormat(default_format)
+        sf = SimpleDateFormat(default_simple_format)
         init()
     }
 
@@ -47,7 +46,7 @@ class Log {
     }
 
     fun record(l: Level, state: String) {
-        fw?.append(String.format(model, l.name, sf.format(Date()), state))
+        fw?.append("${l.name}:[${sf.format(Date())}] $state\n")
         fw?.flush()
     }
 
