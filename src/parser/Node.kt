@@ -1,20 +1,17 @@
 package parser
 
-class Node {
+data class Node(var type: Type,var value: String) {
 
-    var value: String = ""
-    var type: Type = Type.READY_FOR_CHANGE
     var parent: Node? = null
-    var children = ArrayList<Node>()
 
-    constructor(parent: Node, type: Type, value: String) {
+    constructor(parent: Node, type: Type, value: String): this(type, value) {
         this.parent = parent
-        this.type = type
-        this.value = value
     }
 
-    fun deleteLastOne() {
-        children.removeAt(children.size - 1)
+    var children = ArrayList<Node>()
+
+    fun delete(): Node {
+        return children.removeAt(children.size - 1)
     }
 
 }
