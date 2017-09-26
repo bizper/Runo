@@ -14,11 +14,11 @@ object Content {
     }
 
     fun isNumber(num: Char): Boolean {
-        return num in '0'..'9'
+        return (num in '0'..'9') || (num == '-') || (num == '.') || (num == '+') || (num == 'E') || (num == 'e')
     }
 
     fun isNumber(number: String): Boolean {
-        return "[\\-\\d\\\\.]+".toRegex().matches(number)
+        return "^(-)?(0|[1-9][0-9]*)+(.[0-9]+)?([Ee][+-]?[\\d]+)?$".toRegex().matches(number)
     }
 
 }

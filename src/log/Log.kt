@@ -1,5 +1,6 @@
 package log
 
+import resource.Sp
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -30,23 +31,23 @@ class Log {
         }
 
         fun mode(mode: Int) {
-            sf = SimpleDateFormat(when(mode) {
-                DETAIL -> default_format
-                else -> default_simple_format
-            })
-        }
+            when(mode) {
+                DETAIL -> sf = SimpleDateFormat(default_format)
+                SIMPLE -> sf = SimpleDateFormat(default_simple_format)
+                else -> Log.record(Level.WARN, "NO ALLOWED MODE")
+            }
 
+        }
         /**
          * level above this appoint level will not be recorded.
          */
         fun recordLevel(level: Int) {
             limit = level
         }
-
         /**
          * add level in a blacklist, level in this list will be not recorded
          */
-        fun addUnrecordLevel(vararg level: Int) {
+        fun addUnrecordedLevel(vararg level: Int) {
             for(i in level) {
                 limit_array.add(i)
             }
@@ -58,10 +59,11 @@ class Log {
             fw.flush()
         }
 
-        /**
-         * empty method for skipping one step
-         */
-        fun skip() {}
+        fun record(level: Int, sp: Sp) {
+            if(level > limit || level in limit_array) return
+            fw.append("${Level.getTypeName(level)}:[${sf.format(Date())}] ${sp.state} ${sp.string}\n")
+            fw.flush()
+        }
 
         fun end() {
             fw.flush()

@@ -14,4 +14,8 @@ data class Node(var type: Type,var value: String) {
         return children.removeAt(children.size - 1)
     }
 
+    fun getChildren(): Array<Node> {
+        return children.toTypedArray()
+    }
+
 }

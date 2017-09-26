@@ -4,5 +4,5 @@ import parser.Parser
 import resource.Content
 
 fun main(args: Array<String>) {
-    Parser().parse("{\"key\":123,\n\"no\":false}")
+    Parser().parse("{\"1\":9e87}")
 }
