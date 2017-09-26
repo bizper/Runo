@@ -32,9 +32,15 @@ class Log {
 
         fun mode(mode: Int) {
             when(mode) {
-                DETAIL -> sf = SimpleDateFormat(default_format)
-                SIMPLE -> sf = SimpleDateFormat(default_simple_format)
-                else -> Log.record(Level.WARN, "NO ALLOWED MODE")
+                DETAIL -> {
+                    sf = SimpleDateFormat(default_format)
+                    record(Level.INFO, "mode change to DETAIL")
+                }
+                SIMPLE -> {
+                    sf = SimpleDateFormat(default_simple_format)
+                    record(Level.INFO, "mode change to SIMPLE")
+                }
+                else -> record(Level.WARN, "NO ALLOWED MODE")
             }
 
         }
@@ -43,6 +49,7 @@ class Log {
          */
         fun recordLevel(level: Int) {
             limit = level
+            record(Level.INFO, "limit level changed to $level")
         }
         /**
          * add level in a blacklist, level in this list will be not recorded
@@ -50,6 +57,7 @@ class Log {
         fun addUnrecordedLevel(vararg level: Int) {
             for(i in level) {
                 limit_array.add(i)
+                record(Level.INFO, "add $i in limit list")
             }
         }
 

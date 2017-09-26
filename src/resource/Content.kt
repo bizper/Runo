@@ -21,4 +21,8 @@ object Content {
         return "^(-)?(0|[1-9][0-9]*)+(.[0-9]+)?([Ee][+-]?[\\d]+)?$".toRegex().matches(number)
     }
 
+    fun isEnd(char: Char): Boolean {
+        return (char == ',') || (char == '}') || (char == ']')
+    }
+
 }

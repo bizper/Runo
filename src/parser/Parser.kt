@@ -15,13 +15,17 @@ class Parser {
     var root: Node = Node(Type.OBJECT, "")
     var error_flag = true
 
+    private val keywords = arrayOf(',', ':', '"', '{', '}', '[', ']', ' ')//white space will be ignored
+
     init {
-        Log.mode(Log.DETAIL)//使用DETAIL模式
+        Log.mode(Log.SIMPLE)//使用DETAIL模式
         Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
-        Log.record(Level.NORMAL, "start parsing...")
+        Log.record(Level.INFO, "Parser initialized")
     }
 
     fun parse(string: String) {
+        Log.record(Level.INFO, "input string: $string")
+        Log.record(Level.INFO, "start parsing...")
         pointer = 0//confirm pointer location, ready for parsing
         stream = string
         length = stream.length
@@ -29,7 +33,7 @@ class Parser {
             val c = stream[pointer]//get the character at the local pointer
             stateLog(parse(c))
         }
-        Log.record(Level.NORMAL, "parse complete")
+        Log.record(Level.INFO, "parse complete")
     }
 
     fun parse(file: File) {
@@ -67,7 +71,8 @@ class Parser {
             row++
             Sp(State.PARSE_SUCCESS, c)
         } else {
-            Sp(State.PARSE_EXPECT_VALUE, c)
+            if(c in keywords) return Sp(State.PARSE_SUCCESS)
+            else Sp(State.PARSE_EXPECT_VALUE, c)
         }
     }
 
@@ -96,23 +101,36 @@ class Parser {
     }
 
     private fun parseBoolean(): Sp {
-        return Sp(State.PARSE_SUCCESS)
+        var buffer = ""
+        var point = pointer - 1
+        (point until length)
+                .takeWhile { !Content.isEnd(stream[it]) }
+                .forEach {
+                    buffer += stream[it]
+                    point = it
+                }
+        println(buffer)
+        pointer = point + 1
+        return if(buffer == "true" || buffer == "false") Sp(State.PARSE_SUCCESS)
+        else Sp(State.PARSE_INVALID_VALUE, "$row $buffer")
     }
 
     private fun parseNumber(): Sp {
         var buffer = ""
         var point = pointer - 1
         for(i in point until length) {
-                if(stream[i] == ',' || stream[i] == ']' || stream[i] == '}') break
+                if(Content.isEnd(stream[i])) break
                 else {
                     buffer += stream[i]
                     point = i
                 }
         }
+        pointer = point + 1
         println(buffer)
-        return if(Content.isNumber(buffer)) Sp(State.PARSE_INVALID_VALUE, "$row $buffer")
+        return if(!Content.isNumber(buffer)) {
+            Sp(State.PARSE_INVALID_VALUE, "$row $buffer")
+        }
         else {
-            pointer = point + 1
             Sp(State.PARSE_SUCCESS)
         }
     }
