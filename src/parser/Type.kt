@@ -9,6 +9,7 @@ enum class Type {
     BOOLEAN,
     NULL,
     END_DOC,
-    READY_FOR_CHANGE
+    READY_FOR_CHANGE,
+    KEYWORDS
 
 }

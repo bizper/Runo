@@ -8,17 +8,17 @@ import java.net.URL
 
 class Parser {
 
-    var stream: String = ""
-    var pointer = 0
-    var length = 0
-    var row = 0
-    var root: Node = Node(Type.OBJECT, "")
-    var error_flag = true
+    private var stream: String = ""
+    private var pointer = 0
+    private var length = 0
+    private var root: Node = Node(Type.OBJECT, "")
 
-    private val keywords = arrayOf(',', ':', '"', '{', '}', '[', ']', ' ')//white space will be ignored
+    private var list = ArrayList<String>()
+
+    private val keywords = arrayOf(',', ':', '"', '{', '}', '[', ']', ' ', '\n', '\r')//white space will be ignored
 
     init {
-        Log.mode(Log.SIMPLE)//使用DETAIL模式
+        Log.mode(11)//使用SIMPLE模式
         Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
         Log.record(Level.INFO, "Parser initialized")
     }
@@ -29,15 +29,26 @@ class Parser {
         pointer = 0//confirm pointer location, ready for parsing
         stream = string
         length = stream.length
-        while(pointer < length && error_flag) {
+        while(pointer < length) {
             val c = stream[pointer]//get the character at the local pointer
             stateLog(parse(c))
         }
         Log.record(Level.INFO, "parse complete")
     }
 
-    fun parse(file: File) {
-        //TODO add method here
+    fun parseFile(path: String) {
+        val file = File(path)
+        Log.record(Level.INFO, "input file: ${file.canonicalPath}")
+        Log.record(Level.INFO, "start parsing")
+        pointer = 0
+        stream = file.readText()
+        length = stream.length
+        while(pointer < length) {
+            val c = stream[pointer]//get the character at the local pointer
+            stateLog(parse(c))
+        }
+        print(root!!, 0)
+        Log.record(Level.INFO, "parse complete")
     }
 
     fun parse(url: URL) {
@@ -53,8 +64,8 @@ class Parser {
         }
     }
 
-    private fun parse(c: Char): Sp {
-        pointer++
+    private fun parse(c: Char): Sp {//分派器
+        pointer++//此处指针值比char所在的值增加了1
         return if(c == '{') {
             parseObject()
         } else if(c == '[') {
@@ -67,23 +78,43 @@ class Parser {
             parseNumber()
         } else if(c == 'n') {
             parseNull()
-        } else if(c == '\n') {
-            row++
-            Sp(State.PARSE_SUCCESS, c)
         } else {
-            if(c in keywords) return Sp(State.PARSE_SUCCESS)
+            if(c in keywords) return Sp(State.PARSE_SUCCESS, Type.KEYWORDS, c)
             else Sp(State.PARSE_EXPECT_VALUE, c)
         }
     }
 
-    private fun parseObject(): Sp {
-        var size = 0
+    private fun parseObject(): Sp {//解析对象
         var point = pointer
-        return Sp(State.PARSE_SUCCESS)
+        root = Node(Type.OBJECT, "")
+        while(true) {
+            var i = point
+            if(stream[i] == '}') {
+                break
+            }
+            val s = parse(stream[i])
+            i = pointer
+            point = i
+            return s
+        }
+        pointer = point + 1
+        return Sp(State.PARSE_SUCCESS, Type.OBJECT)
     }
 
-    private fun parseArray(): Sp {
-        return Sp(State.PARSE_SUCCESS)
+    private fun parseArray(): Sp {//解析数组
+        var point = pointer
+        while(true) {
+            var i = point
+            if(stream[i] == ']') {
+                break
+            }
+            val s = parse(stream[i])
+            i = pointer
+            point = i
+            return s
+        }
+        pointer = point + 1
+        return Sp(State.PARSE_SUCCESS, Type.ARRAY)
     }
 
     private fun parseString(): Sp {
@@ -95,48 +126,83 @@ class Parser {
                     buffer += stream[it]
                     point = it
                 }
-        println(buffer)
+        list.add(buffer.trim())
         pointer = point + 2//shift the pointer to the location where behind the next quote.
-        return Sp(State.PARSE_SUCCESS)
+        return Sp(State.PARSE_SUCCESS, buffer)
     }
 
-    private fun parseBoolean(): Sp {
+    private fun parseBoolean(): Sp {//解析布尔值
         var buffer = ""
         var point = pointer - 1
         (point until length)
                 .takeWhile { !Content.isEnd(stream[it]) }
                 .forEach {
-                    buffer += stream[it]
-                    point = it
+                    if(!Content.isWhiteSpace(stream[it])) {
+                        buffer += stream[it]
+                        point = it
+                    }
                 }
-        println(buffer)
+        list.add(buffer.trim())
         pointer = point + 1
-        return if(buffer == "true" || buffer == "false") Sp(State.PARSE_SUCCESS)
-        else Sp(State.PARSE_INVALID_VALUE, "$row $buffer")
+        return if(buffer == "true" || buffer == "false") {
+            Sp(State.PARSE_SUCCESS, Type.BOOLEAN, buffer.trim())
+        }
+        else {
+            Sp(State.PARSE_INVALID_VALUE, Type.BOOLEAN, buffer)
+        }
     }
 
-    private fun parseNumber(): Sp {
+    private fun parseNumber(): Sp {//解析数字
         var buffer = ""
         var point = pointer - 1
         for(i in point until length) {
                 if(Content.isEnd(stream[i])) break
-                else {
+                else if(!Content.isWhiteSpace(stream[i])){
                     buffer += stream[i]
                     point = i
                 }
         }
+        list.add(buffer.trim())
         pointer = point + 1
-        println(buffer)
-        return if(!Content.isNumber(buffer)) {
-            Sp(State.PARSE_INVALID_VALUE, "$row $buffer")
+        return if(!Content.isNumber(buffer)) {//校验数字格式是否正确
+            Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, buffer)
         }
         else {
-            Sp(State.PARSE_SUCCESS)
+            Sp(State.PARSE_SUCCESS, Type.NUMBER, buffer.trim())
         }
     }
 
-    private fun parseNull(): Sp {
-        return Sp(State.PARSE_SUCCESS)
+    private fun parseNull(): Sp {//解析空值
+        var buffer = ""
+        var point = pointer - 1
+        (point until length)
+                .takeWhile { !Content.isEnd(stream[it]) }
+                .forEach {
+                    if(!Content.isWhiteSpace(stream[it])) {
+                        buffer += stream[it]
+                        point = it
+                    }
+                }
+        list.add(buffer.trim())
+        pointer = point + 1
+        return if(buffer == "null") Sp(State.PARSE_SUCCESS, Type.NULL, buffer.trim())
+        else Sp(State.PARSE_INVALID_VALUE, Type.NULL, buffer)
+    }
+
+    fun print() {
+        for(s in list) println(s)
+    }
+
+    fun print(node: Node, height: Int) {
+        (0..height).forEach {
+            print(" ")
+        }
+        print("|--<${node.type} ${node.value}>\n")
+        if(node.children.size != 0) {
+            for(n in node.children) {
+                print(n, height + 1)
+            }
+        }
     }
 
 }

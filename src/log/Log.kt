@@ -34,13 +34,13 @@ class Log {
             when(mode) {
                 DETAIL -> {
                     sf = SimpleDateFormat(default_format)
-                    record(Level.INFO, "mode change to DETAIL")
+                    record(Level.INFO, "MODE CHANGE TO DETAIL")
                 }
                 SIMPLE -> {
                     sf = SimpleDateFormat(default_simple_format)
-                    record(Level.INFO, "mode change to SIMPLE")
+                    record(Level.INFO, "MODE CHANGE TO SIMPLE")
                 }
-                else -> record(Level.WARN, "NO ALLOWED MODE")
+                else -> record(Level.WARN, "NO ALLOWED MODE, DEFAULT MODE IS SIMPLE")
             }
 
         }
@@ -49,7 +49,7 @@ class Log {
          */
         fun recordLevel(level: Int) {
             limit = level
-            record(Level.INFO, "limit level changed to $level")
+            record(Level.INFO, "LIMITED LEVEL CHANGE TO ${Level.getTypeName(level)}")
         }
         /**
          * add level in a blacklist, level in this list will be not recorded
@@ -57,19 +57,19 @@ class Log {
         fun addUnrecordedLevel(vararg level: Int) {
             for(i in level) {
                 limit_array.add(i)
-                record(Level.INFO, "add $i in limit list")
+                record(Level.INFO, "ADD ${Level.getTypeName(i)} IN LIMIT LIST")
             }
         }
 
         fun record(level: Int, state: String) {
             if(level > limit || level in limit_array) return//check level list
-            fw.append("${Level.getTypeName(level)}:[${sf.format(Date())}] $state\n")
+            fw.append("${Level.getTypeName(level)}:[${sf.format(Date())}] $state\r\n")
             fw.flush()
         }
 
         fun record(level: Int, sp: Sp) {
             if(level > limit || level in limit_array) return
-            fw.append("${Level.getTypeName(level)}:[${sf.format(Date())}] ${sp.state} ${sp.string}\n")
+            fw.append("${Level.getTypeName(level)}:[${sf.format(Date())}] ${sp.state} ${sp.type} ${sp.string}\r\n")
             fw.flush()
         }
 

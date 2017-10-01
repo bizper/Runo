@@ -1,8 +1,9 @@
-package UnitTest
+package unitTest
 
 import parser.Parser
-import resource.Content
 
 fun main(args: Array<String>) {
-    Parser().parse("{\"1\":true, \"key\":0.4e+5}")
+    val p = Parser()//创建解析器
+    p.parseFile("./test.json")//解析文件
+    p.print()//输出解析内容
 }
