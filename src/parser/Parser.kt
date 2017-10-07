@@ -1,8 +1,8 @@
 package parser
 
 import log.*
+import log.Log.Level
 import resource.*
-import java.io.BufferedInputStream
 import java.io.File
 import java.net.URL
 
@@ -11,35 +11,50 @@ class Parser {
     private var stream: String = ""
     private var pointer = 0
     private var length = 0
-    private var root: Node = Node(Type.OBJECT, "")
+    private var root = Node(Type.OBJECT, "")
 
     private var list = ArrayList<String>()
 
-    private val keywords = arrayOf(',', ':', '"', '{', '}', '[', ']', ' ', '\n', '\r')//white space will be ignored
+    private val keywords = arrayOf(' ', '{', '[', '}', ']', ',', '\n', ':', '"', '\r')
+
+    private var value_flag = false
+    private var log_flag = true
 
     init {
-        Log.mode(11)//使用SIMPLE模式
-        Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
-        Log.record(Level.INFO, "Parser initialized")
+        if(log_flag) {
+            Log.mode(11)//使用SIMPLE模式
+            Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
+            Log.record(Level.INFO, "Parser initialized")
+        }
+    }
+
+    fun isAllowLog(flag: Boolean): Parser {
+        this.log_flag = flag
+        return this
     }
 
     fun parse(string: String) {
-        Log.record(Level.INFO, "input string: $string")
-        Log.record(Level.INFO, "start parsing...")
+        if(log_flag) {
+            Log.record(Level.INFO, "input string: $string")
+            Log.record(Level.INFO, "start parsing...")
+        }
         pointer = 0//confirm pointer location, ready for parsing
         stream = string
         length = stream.length
         while(pointer < length) {
-            val c = stream[pointer]//get the character at the local pointer
+            val c = stream[pointer]//get the character at the pointer
             stateLog(parse(c))
         }
-        Log.record(Level.INFO, "parse complete")
+        print(root!!, 0)
+        if(log_flag) Log.record(Level.INFO, "parse complete")
     }
 
     fun parseFile(path: String) {
         val file = File(path)
-        Log.record(Level.INFO, "input file: ${file.canonicalPath}")
-        Log.record(Level.INFO, "start parsing")
+        if(log_flag) {
+            Log.record(Level.INFO, "input file: ${file.canonicalPath}")
+            Log.record(Level.INFO, "start parsing")
+        }
         pointer = 0
         stream = file.readText()
         length = stream.length
@@ -48,7 +63,7 @@ class Parser {
             stateLog(parse(c))
         }
         print(root!!, 0)
-        Log.record(Level.INFO, "parse complete")
+        if(log_flag) Log.record(Level.INFO, "parse complete")
     }
 
     fun parse(url: URL) {
@@ -57,10 +72,10 @@ class Parser {
 
     private fun stateLog(sp: Sp) {
         when(sp.state) {
-            State.PARSE_EXPECT_VALUE -> Log.record(Level.ERROR, sp)
-            State.PARSE_INVALID_VALUE -> Log.record(Level.ERROR, sp)
-            State.PARSE_ROOT_NOT_SINGULAR -> Log.record(Level.WARN, sp)
-            State.PARSE_SUCCESS -> Log.record(Level.NORMAL, sp)
+            State.PARSE_EXPECT_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
+            State.PARSE_INVALID_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
+            State.PARSE_ROOT_NOT_SINGULAR -> if(log_flag) Log.record(Level.WARN, sp) else println(sp)
+            State.PARSE_SUCCESS -> if(log_flag) Log.record(Level.NORMAL, sp) else println(sp)
         }
     }
 
@@ -78,6 +93,10 @@ class Parser {
             parseNumber()
         } else if(c == 'n') {
             parseNull()
+        } else if(c == ':') {
+            Sp(State.PARSE_SUCCESS, c)
+        } else if(Content.isEnd(c)) {
+            Sp(State.PARSE_SUCCESS, c)
         } else {
             if(c in keywords) return Sp(State.PARSE_SUCCESS, Type.KEYWORDS, c)
             else Sp(State.PARSE_EXPECT_VALUE, c)
@@ -86,34 +105,40 @@ class Parser {
 
     private fun parseObject(): Sp {//解析对象
         var point = pointer
-        root = Node(Type.OBJECT, "")
+        if(root.type == Type.STRING) root.type = Type.OBJECT
+        value_flag = false
+        var i = point
         while(true) {
-            var i = point
             if(stream[i] == '}') {
+                point = pointer
                 break
             }
-            val s = parse(stream[i])
+            parse(stream[i])
             i = pointer
-            point = i
-            return s
         }
         pointer = point + 1
+        root = if(root.parent == null) root else root.parent!!
         return Sp(State.PARSE_SUCCESS, Type.OBJECT)
     }
 
     private fun parseArray(): Sp {//解析数组
         var point = pointer
+        if(root.type == Type.STRING) root.type = Type.ARRAY
+        var cache = root
+        var i = point
         while(true) {
-            var i = point
             if(stream[i] == ']') {
+                point = pointer
                 break
             }
-            val s = parse(stream[i])
+            value_flag = true
+            root = cache
+            parse(stream[i])
             i = pointer
-            point = i
-            return s
         }
         pointer = point + 1
+        root = if(root.parent == null) root else root.parent!!
+        value_flag = false//reset value flag
         return Sp(State.PARSE_SUCCESS, Type.ARRAY)
     }
 
@@ -127,6 +152,17 @@ class Parser {
                     point = it
                 }
         list.add(buffer.trim())
+        if(!value_flag) {
+            val node = Node(root, Type.STRING, buffer.trim())
+            root.add(node)
+            root = node
+            value_flag = !value_flag
+        } else {
+            val node = Node(root, Type.STRING, buffer.trim())
+            root.add(node)
+            root = if(root.parent == null) root else root.parent!!
+            value_flag = !value_flag
+        }
         pointer = point + 2//shift the pointer to the location where behind the next quote.
         return Sp(State.PARSE_SUCCESS, buffer)
     }
@@ -143,6 +179,15 @@ class Parser {
                     }
                 }
         list.add(buffer.trim())
+        if(!value_flag) {
+            value_flag = !value_flag
+            return Sp(State.PARSE_INVALID_VALUE, Type.BOOLEAN, "${buffer.trim()} can not be key")
+        } else {
+            val node = Node(root, Type.BOOLEAN, buffer.trim())
+            root.add(node)
+            root = if(root.parent == null) root else root.parent!!
+            value_flag = !value_flag
+        }
         pointer = point + 1
         return if(buffer == "true" || buffer == "false") {
             Sp(State.PARSE_SUCCESS, Type.BOOLEAN, buffer.trim())
@@ -163,6 +208,15 @@ class Parser {
                 }
         }
         list.add(buffer.trim())
+        if(!value_flag) {
+            value_flag = !value_flag
+            return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "${buffer.trim()} can not be key")
+        } else {
+            val node = Node(root, Type.NUMBER, buffer.trim())
+            root.add(node)
+            root = if(root.parent == null) root else root.parent!!
+            value_flag = !value_flag
+        }
         pointer = point + 1
         return if(!Content.isNumber(buffer)) {//校验数字格式是否正确
             Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, buffer)
@@ -184,6 +238,15 @@ class Parser {
                     }
                 }
         list.add(buffer.trim())
+        if(!value_flag) {
+            value_flag = !value_flag
+            return Sp(State.PARSE_INVALID_VALUE, Type.NULL, "${buffer.trim()} can not be key")
+        } else {
+            val node = Node(root, Type.NULL, buffer.trim())
+            root.add(node)
+            root = if(root.parent == null) root else root.parent!!
+            value_flag = !value_flag
+        }
         pointer = point + 1
         return if(buffer == "null") Sp(State.PARSE_SUCCESS, Type.NULL, buffer.trim())
         else Sp(State.PARSE_INVALID_VALUE, Type.NULL, buffer)
@@ -193,9 +256,9 @@ class Parser {
         for(s in list) println(s)
     }
 
-    fun print(node: Node, height: Int) {
+    private fun print(node: Node, height: Int) {
         (0..height).forEach {
-            print(" ")
+            if(it >= 1) print("\t")
         }
         print("|--<${node.type} ${node.value}>\n")
         if(node.children.size != 0) {
@@ -203,6 +266,10 @@ class Parser {
                 print(n, height + 1)
             }
         }
+    }
+
+    private fun println(sp: Sp) {
+        println("${sp.state} ${sp.type} ${sp.string}")
     }
 
 }
