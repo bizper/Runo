@@ -76,7 +76,7 @@ class Log {
          * level above this appoint level will not be recorded.
          */
         fun recordLevel(level: Int) {
-            limit = level
+            limit = if(level >= Level.INFO) Level.NORMAL else level
             record(Level.INFO, "LIMITED LEVEL CHANGE TO ${Level.getTypeName(level)}")
         }
         /**
@@ -84,7 +84,7 @@ class Log {
          */
         fun addUnrecordedLevel(vararg level: Int) {
             for(i in level) {
-                limit_array.add(i)
+                limit_array.add(if(i >= Level.INFO) Level.NORMAL else i)
                 record(Level.INFO, "ADD ${Level.getTypeName(i)} IN LIMIT LIST")
             }
         }

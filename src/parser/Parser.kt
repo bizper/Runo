@@ -20,17 +20,16 @@ class Parser {
     private var value_flag = false
     private var log_flag = true
 
-    init {
+    constructor() {
         if(log_flag) {
-            Log.mode(11)//使用SIMPLE模式
+            Log.mode(Log.DETAIL)//使用SIMPLE模式
             Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
             Log.record(Level.INFO, "Parser initialized")
         }
     }
 
-    fun isAllowLog(flag: Boolean): Parser {
+    constructor(flag: Boolean): this() {
         this.log_flag = flag
-        return this
     }
 
     fun parse(string: String) {
@@ -113,7 +112,7 @@ class Parser {
                 point = pointer
                 break
             }
-            parse(stream[i])
+            stateLog(parse(stream[i]))
             i = pointer
         }
         pointer = point + 1
@@ -124,16 +123,16 @@ class Parser {
     private fun parseArray(): Sp {//解析数组
         var point = pointer
         if(root.type == Type.STRING) root.type = Type.ARRAY
-        var cache = root
+        val cache = root
         var i = point
         while(true) {
             if(stream[i] == ']') {
                 point = pointer
                 break
             }
-            value_flag = true
+            value_flag = true//add buffer as value in array
             root = cache
-            parse(stream[i])
+            stateLog(parse(stream[i]))
             i = pointer
         }
         pointer = point + 1
@@ -207,12 +206,13 @@ class Parser {
                     point = i
                 }
         }
-        list.add(buffer.trim())
+        buffer = buffer.trim()
+        list.add(buffer)
         if(!value_flag) {
             value_flag = !value_flag
-            return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "${buffer.trim()} can not be key")
+            return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "${buffer} can not be key")
         } else {
-            val node = Node(root, Type.NUMBER, buffer.trim())
+            val node = Node(root, Type.NUMBER, buffer)
             root.add(node)
             root = if(root.parent == null) root else root.parent!!
             value_flag = !value_flag
@@ -222,7 +222,7 @@ class Parser {
             Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, buffer)
         }
         else {
-            Sp(State.PARSE_SUCCESS, Type.NUMBER, buffer.trim())
+            Sp(State.PARSE_SUCCESS, Type.NUMBER, buffer)
         }
     }
 
