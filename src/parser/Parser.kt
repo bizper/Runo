@@ -32,6 +32,15 @@ class Parser {
         this.log_flag = flag
     }
 
+    constructor(type: String, path: String): this() {
+        when(type) {
+            "file" -> parseFile(path)
+            "string" -> parse(path)
+            "url" -> parse(URL(path))
+            else -> Log.record(Level.ERROR, "type error")
+        }
+    }
+
     fun parse(string: String) {
         if(log_flag) {
             Log.record(Level.INFO, "input string: $string")
@@ -92,10 +101,6 @@ class Parser {
             parseNumber()
         } else if(c == 'n') {
             parseNull()
-        } else if(c == ':') {
-            Sp(State.PARSE_SUCCESS, c)
-        } else if(Content.isEnd(c)) {
-            Sp(State.PARSE_SUCCESS, c)
         } else {
             if(c in keywords) return Sp(State.PARSE_SUCCESS, Type.KEYWORDS, c)
             else Sp(State.PARSE_EXPECT_VALUE, c)
