@@ -3,5 +3,7 @@ package unitTest
 import parser.Parser
 
 fun main(args: Array<String>) {
-    val p = Parser("file", "./test.json")//创建解析器
+    val p = Parser()//创建解析器
+    val b = p.parseFile("./test.json");
+    println(b.check("$.main.string"))
 }

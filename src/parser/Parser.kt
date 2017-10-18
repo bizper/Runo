@@ -1,5 +1,6 @@
 package parser
 
+import checker.Bean
 import log.*
 import log.Log.Level
 import resource.*
@@ -41,7 +42,7 @@ class Parser {
         }
     }
 
-    fun parse(string: String) {
+    fun parse(string: String): Bean {
         if(log_flag) {
             Log.record(Level.INFO, "input string: $string")
             Log.record(Level.INFO, "start parsing...")
@@ -53,11 +54,12 @@ class Parser {
             val c = stream[pointer]//get the character at the pointer
             stateLog(parse(c))
         }
-        print(root!!, 0)
+        print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
+        return Bean(root)
     }
 
-    fun parseFile(path: String) {
+    fun parseFile(path: String): Bean {
         val file = File(path)
         if(log_flag) {
             Log.record(Level.INFO, "input file: ${file.canonicalPath}")
@@ -70,8 +72,9 @@ class Parser {
             val c = stream[pointer]//get the character at the local pointer
             stateLog(parse(c))
         }
-        print(root!!, 0)
+        print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
+        return Bean(root)
     }
 
     fun parse(url: URL) {
@@ -109,6 +112,11 @@ class Parser {
 
     private fun parseObject(): Sp {//解析对象
         var point = pointer
+        if(root.type == Type.ARRAY) {
+            val node = Node(root, Type.OBJECT, "")
+            root.add(node)
+            root = node
+        }
         if(root.type == Type.STRING) root.type = Type.OBJECT
         value_flag = false
         var i = point
@@ -265,7 +273,7 @@ class Parser {
         (0..height).forEach {
             if(it >= 1) print("\t")
         }
-        print("|--<${node.type} ${node.value}>\n")
+        print("|--<${node.type}${if(node.value == "") "" else " "}${node.value}>\n")
         if(node.children.size != 0) {
             for(n in node.children) {
                 print(n, height + 1)
