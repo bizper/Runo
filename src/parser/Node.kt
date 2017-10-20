@@ -32,4 +32,8 @@ class Node {
         children.add(node)
     }
 
+    fun getKid(): Node {
+        return children[0]
+    }
+
 }
