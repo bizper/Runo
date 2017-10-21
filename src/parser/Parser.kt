@@ -43,6 +43,10 @@ class Parser {
     }
 
     fun parse(string: String): Bean {
+        return parse(string, false)
+    }
+
+    fun parse(string: String, isDebug: Boolean): Bean {
         if(log_flag) {
             Log.record(Level.INFO, "input string: $string")
             Log.record(Level.INFO, "start parsing...")
@@ -54,12 +58,16 @@ class Parser {
             val c = stream[pointer]//get the character at the pointer
             stateLog(parse(c))
         }
-        print(root, 0)
+        if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
         return Bean(root)
     }
 
     fun parseFile(path: String): Bean {
+        return parseFile(path, false)
+    }
+
+    fun parseFile(path: String, isDebug: Boolean): Bean {
         val file = File(path)
         if(log_flag) {
             Log.record(Level.INFO, "input file: ${file.canonicalPath}")
@@ -72,7 +80,7 @@ class Parser {
             val c = stream[pointer]//get the character at the local pointer
             stateLog(parse(c))
         }
-        print(root, 0)
+        if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
         return Bean(root)
     }

@@ -14,8 +14,6 @@ open abstract class AbstractBean {
         var length = key.split(".").size
         for((type, value) in keys) {
             if(index > length) break
-            println("$type $value")
-            println("${root.type} ${root.value}")
             when(type) {
                 ExprType.ROOT -> while(root.parent != null) {root = root.parent!!}
                 ExprType.ARRAY -> {
@@ -30,16 +28,17 @@ open abstract class AbstractBean {
                 ExprType.CHECK_STRING -> {
                     root.children
                             .asSequence()
-                            .filter { it.value == value && (it.type == Type.STRING || it.type == Type.OBJECT) }
+                            .filter { it.value == value }
                             .forEach {
-                                println(it.value)
-                                root = it.getKid()
+                                if(it.type == Type.OBJECT) {
+                                    root = it
+                                } else if(it.type == Type.STRING) {
+                                    root = it.getKid()
+                                }
                             }
                 }
             }
             index ++
-            println("${root.type} ${root.value}")
-            println("*************************")
         }
         return root.value
     }
