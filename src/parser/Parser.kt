@@ -14,8 +14,6 @@ class Parser {
     private var length = 0
     private var root = Node(Type.OBJECT, "")
 
-    private var list = ArrayList<String>()
-
     private val keywords = arrayOf(' ', '{', '[', '}', ']', ',', '\n', ':', '"', '\r')
 
     private var value_flag = false
@@ -171,7 +169,6 @@ class Parser {
                     buffer += stream[it]
                     point = it
                 }
-        list.add(buffer.trim())
         if(!value_flag) {
             val node = Node(root, Type.STRING, buffer.trim())
             root.add(node)
@@ -198,7 +195,6 @@ class Parser {
                         point = it
                     }
                 }
-        list.add(buffer.trim())
         if(!value_flag) {
             value_flag = !value_flag
             return Sp(State.PARSE_INVALID_VALUE, Type.BOOLEAN, "${buffer.trim()} can not be key")
@@ -228,7 +224,6 @@ class Parser {
                 }
         }
         buffer = buffer.trim()
-        list.add(buffer)
         if(!value_flag) {
             value_flag = !value_flag
             return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "${buffer} can not be key")
@@ -258,7 +253,6 @@ class Parser {
                         point = it
                     }
                 }
-        list.add(buffer.trim())
         if(!value_flag) {
             value_flag = !value_flag
             return Sp(State.PARSE_INVALID_VALUE, Type.NULL, "${buffer.trim()} can not be key")
@@ -271,10 +265,6 @@ class Parser {
         pointer = point + 1
         return if(buffer == "null") Sp(State.PARSE_SUCCESS, Type.NULL, buffer.trim())
         else Sp(State.PARSE_INVALID_VALUE, Type.NULL, buffer)
-    }
-
-    fun print() {
-        for(s in list) println(s)
     }
 
     private fun print(node: Node, height: Int) {
