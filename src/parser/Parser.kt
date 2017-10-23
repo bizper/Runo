@@ -23,7 +23,7 @@ class Parser {
         if(log_flag) {
             Log.mode(Log.DETAIL)//使用SIMPLE模式
             Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
-            Log.record(Level.INFO, "Parser initialized")
+            Log.record(Level.INFO, "PARSER INITIALIZED")
         }
     }
 

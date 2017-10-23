@@ -30,4 +30,11 @@ object Expr {
         return array_regex.findAll(string).toList().flatMap(MatchResult::groupValues).toTypedArray()
     }
 
+    private fun parseCalExpr(string: String): Int {
+        for(c in string) {
+
+        }
+        return 0
+    }
+
 }
