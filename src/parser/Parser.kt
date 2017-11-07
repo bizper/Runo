@@ -50,7 +50,7 @@ class Parser {
             Log.record(Level.INFO, "start parsing...")
         }
         pointer = 0//confirm pointer location, ready for parsing
-        stream = string
+        stream = string.trim()
         length = stream.length
         while(pointer < length) {
             val c = stream[pointer]//get the character at the pointer
@@ -110,6 +110,8 @@ class Parser {
             parseNumber()
         } else if(c == 'n') {
             parseNull()
+        } else if(c == ',') {
+            parseComma()
         } else {
             if(c in keywords) return Sp(State.PARSE_SUCCESS, Type.KEYWORDS, c)
             else Sp(State.PARSE_EXPECT_VALUE, c)
@@ -226,7 +228,7 @@ class Parser {
         buffer = buffer.trim()
         if(!value_flag) {
             value_flag = !value_flag
-            return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "${buffer} can not be key")
+            return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "$buffer can not be key")
         } else {
             val node = Node(root, Type.NUMBER, buffer)
             root.add(node)
@@ -281,6 +283,20 @@ class Parser {
 
     private fun println(sp: Sp) {
         println("${sp.state} ${sp.type} ${sp.string}")
+    }
+
+    private fun parseComma(): Sp {
+        var point = pointer
+        var c = stream[point]
+        while(Content.isWhiteSpace(c)) {
+            point ++
+            c = stream[point]
+        }
+        return if(Content.isEnd(stream[pointer])) {
+            Sp(State.PARSE_INVALID_VALUE, stream[pointer])
+        } else {
+            Sp(State.PARSE_SUCCESS, Type.KEYWORDS, stream[pointer])
+        }
     }
 
 }

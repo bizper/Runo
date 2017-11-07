@@ -1,6 +1,7 @@
 package checker
 
 import Expr.*
+import Expr.ExprType.*
 import parser.Node
 import parser.Type
 
@@ -9,23 +10,20 @@ open abstract class AbstractBean {
     lateinit var root: Node
 
     fun check(key: String): String {
-        var index = 0
-        var keys = Expr.parseExpr(key)
-        var length = key.split(".").size
+        val keys = Expr.parseExpr(key)
         for((type, value) in keys) {
-            if(index > length) break
             when(type) {
-                ExprType.ROOT -> while(root.parent != null) {root = root.parent!!}
-                ExprType.ARRAY -> {
+                ROOT -> while(root.parent != null) {root = root.parent!!}
+                ARRAY -> {
                     root.children
                             .asSequence()
                             .filter { it.value == value && it.type == Type.ARRAY}
                             .forEach { root = it }
                 }
-                ExprType.ARRAY_INDEX -> {
+                ARRAY_INDEX -> {
                     root = root.children[value.toInt()]
                 }
-                ExprType.CHECK_STRING -> {
+                CHECK_STRING -> {
                     root.children
                             .asSequence()
                             .filter { it.value == value }
@@ -38,7 +36,6 @@ open abstract class AbstractBean {
                             }
                 }
             }
-            index ++
         }
         return root.value
     }
