@@ -27,7 +27,7 @@ out of array index will get __Null__.
   symbol |    meaning    
 :-------:|:---------------:
    $     | root node
-   .     |    sperator   
+   .     |    separator 
   [x]    |x is index of array
    @     |  current node
    \#     | length of element
