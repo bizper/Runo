@@ -40,9 +40,9 @@ class Parser {
         }
     }
 
-    fun parse(string: String): Bean {
-        return parse(string, false)
-    }
+    fun parse(string: String): Bean =
+        parse(string, false)
+
 
     fun parse(string: String, isDebug: Boolean): Bean {
         if(log_flag) {
@@ -281,9 +281,7 @@ class Parser {
         }
     }
 
-    private fun println(sp: Sp) {
-        println("${sp.state} ${sp.type} ${sp.string}")
-    }
+    private fun println(sp: Sp) = println("${sp.state} ${sp.type} ${sp.string}")
 
     private fun parseComma(): Sp {
         var point = pointer
