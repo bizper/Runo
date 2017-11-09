@@ -5,6 +5,8 @@ object Expr {
     private val       root_name = "root"
     private val     root_symbol = "$"
     private val all_node_symbol = "*"
+    private val    current_node = "@"
+    private val  element_length = "#"
     private val     array_regex = "([\\w\\W]+)\\[([\\w]+)]".intern().toRegex()
 
     fun parseExpr(expr: String): ArrayList<ExprPack> {
