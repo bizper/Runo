@@ -30,4 +30,4 @@ out of array index will get __Null__.
    .     |    sperator   
   [x]    |x is index of array
    @     |  current node
-   #     | length of element
+   \#     | length of element
