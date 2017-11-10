@@ -44,7 +44,7 @@ object Expr {
         var result = 0
         val stack = ArrayList<Char>()
         val num = ArrayList<Int>()
-        var buffer = StringBuffer()
+        val buffer = StringBuffer()
         for(c in string) {
             when(c) {
                 '#' -> num.add(length)

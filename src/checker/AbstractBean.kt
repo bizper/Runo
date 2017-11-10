@@ -22,7 +22,11 @@ open abstract class AbstractBean {
                             .forEach { cache = it }
                 }
                 ARRAY_INDEX -> {
-                    cache = if(value.contains("[+\\-*/#]+".toRegex())) cache.children[Expr.parseCalExpr(value, cache.children.size)]
+                    cache = if(value.contains("[+\\-*/#]+".toRegex())) {
+                        val index = Expr.parseCalExpr(value, cache.children.size)
+                        if(index >= cache.children.size) getNullNode(cache)
+                        else cache.children[index]
+                    }
                     else cache.children[value.toInt()]
                 }
                 LENGTH -> {
@@ -44,5 +48,7 @@ open abstract class AbstractBean {
         }
         return cache.value
     }
+
+    private fun getNullNode(parent: Node): Node = Node(parent, "Null")
 
 }
