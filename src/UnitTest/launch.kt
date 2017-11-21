@@ -1,10 +1,9 @@
 package UnitTest
 
 import parser.Parser
-import search.Expr
+import sizable.Sizable
 
 fun main(args: Array<String>) {
-    val p = Parser()//创建解析器
-    val b = p.parseFile("./test.json", true)
-    println(b.check("$[#]"))
+    val netfors = test()
+    println(Sizable.toJSON("", netfors, 0))
 }

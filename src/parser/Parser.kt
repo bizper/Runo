@@ -21,7 +21,7 @@ class Parser {
 
     constructor() {
         if(log_flag) {
-            Log.mode(Log.DETAIL)//使用SIMPLE模式
+            Log.mode(Log.DETAIL)//使用DETAIL模式
             Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
             Log.record(Level.INFO, "PARSER INITIALIZED")
         }
@@ -53,8 +53,7 @@ class Parser {
         stream = string.trim()
         length = stream.length
         while(pointer < length) {
-            val c = stream[pointer]//get the character at the pointer
-            stateLog(parse(c))
+            stateLog(parse(stream[pointer]))
         }
         if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
@@ -69,14 +68,13 @@ class Parser {
         val file = File(path)
         if(log_flag) {
             Log.record(Level.INFO, "input file: ${file.canonicalPath}")
-            Log.record(Level.INFO, "start parsing")
+            Log.record(Level.INFO, "start parsing...")
         }
         pointer = 0
         stream = file.readText()
         length = stream.length
         while(pointer < length) {
-            val c = stream[pointer]//get the character at the local pointer
-            stateLog(parse(c))
+            stateLog(parse(stream[pointer]))
         }
         if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
@@ -280,8 +278,6 @@ class Parser {
             }
         }
     }
-
-    private fun println(sp: Sp) = println("${sp.state} ${sp.type} ${sp.string}")
 
     private fun parseComma(): Sp {
         var point = pointer

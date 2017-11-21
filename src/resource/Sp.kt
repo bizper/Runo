@@ -14,4 +14,8 @@ data class Sp(var state: State, var type: Type, var string: String) {
 
     constructor(state: State, type: Type): this(state, type, "")
 
+    override fun toString(): String {
+        return "$state $type $string"
+    }
+
 }

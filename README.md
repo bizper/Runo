@@ -20,14 +20,17 @@ support normal operator such as __+ - * /__
 
 all result will be casted to __String__.
 
-out of array index will get __Null__.
+out of array index will get __"Null"__.
+
+command after \# and \* will be ignored.
 
 ###### SEARCH SYNTAX
 
   symbol |    meaning    
 :-------:|:---------------:
    $     | root node
-   .     |    separator 
+   .     |    separator
   [x]    |x is index of array
    @     |  current node
    \#     | length of element
+  \*  | all value in nodes

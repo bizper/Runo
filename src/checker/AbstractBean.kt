@@ -26,10 +26,19 @@ open abstract class AbstractBean {
                 ARRAY_INDEX -> {
                     cache = if(value.contains("[+\\-*/#]+".toRegex())) {
                         val index = Expr.parseCalExpr(value, cache.children.size)
-                        if(index >= cache.children.size) getNullNode(cache)
-                        else cache.children[index]
+                        if(index >= cache.children.size || index < 0) getNullNode(cache)
+                        else if(cache.children[index].type != Type.STRING) Node(cache, getInsideString(cache.children[index])) else cache.children[index]
                     }
-                    else cache.children[value.toInt()]
+                    else if(cache.children[value.toInt()].type != Type.STRING) Node(cache, getInsideString(cache.children[value.toInt()])) else cache.children[value.toInt()]
+                }
+                ARRAY_ALL_NODE -> {
+                    val buffer = StringBuffer()
+                    for(n in cache.children) {
+                        buffer.append(if(n.type == Type.STRING) n.value else getInsideString(n))
+                        buffer.append(" ")
+                    }
+                    buffer.deleteCharAt(buffer.lastIndex)
+                    cache = Node(cache, Type.STRING, buffer.toString())
                 }
                 LENGTH -> {
                     cache.value = (if(cache.type == Type.ARRAY) cache.children.size else cache.value.length).toString()
@@ -52,5 +61,17 @@ open abstract class AbstractBean {
     }
 
     private fun getNullNode(parent: Node): Node = Node(parent, "Null")
+
+    private fun getInsideString(start: Node): String {
+        val buffer = StringBuffer()
+        for(n in start.children) {
+            buffer.append(n.value)
+            buffer.append(':')
+            buffer.append(n.getKid().value)
+            buffer.append(' ')
+        }
+        buffer.deleteCharAt(buffer.lastIndex)
+        return buffer.toString()
+    }
 
 }
