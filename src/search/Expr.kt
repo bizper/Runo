@@ -9,6 +9,7 @@ object Expr {
     private val     root_symbol = "$"
     private val    current_node = "@"
     private val  element_length = "#"
+    private val        all_node = "*"
     private val     array_regex = "([\\w\\W]+)\\[([\\w#\\-+*/]+)]".toRegex()
 
     fun parseExpr(expr: String): ArrayList<ExprPack> {
@@ -24,6 +25,10 @@ object Expr {
                 }
                 i == element_length -> {
                     command.add(ExprPack(LENGTH, element_length))
+                    break@outer
+                }
+                i == all_node -> {
+                    command.add(ExprPack(ARRAY_ALL_NODE, all_node))
                     break@outer
                 }
                 else -> command.add(ExprPack(CHECK_STRING, i))

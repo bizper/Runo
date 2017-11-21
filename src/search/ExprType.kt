@@ -7,6 +7,7 @@ enum class ExprType {
     LENGTH,
     ARRAY_INDEX,
     ARRAY_CONDITION,
+    ARRAY_ALL_NODE,
     CHECK_STRING
 
 }

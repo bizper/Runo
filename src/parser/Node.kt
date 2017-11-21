@@ -20,20 +20,15 @@ class Node {
 
     var children = ArrayList<Node>()
 
-    fun delete(): Node {
-        return children.removeAt(children.size - 1)
-    }
+    fun delete(): Node = children.removeAt(children.size - 1)
 
-    fun getChildren(): Array<Node> {
-        return children.toTypedArray()
-    }
+    fun getChildren(): Array<Node> = children.toTypedArray()
+
 
     fun add(node: Node) {
         children.add(node)
     }
 
-    fun getKid(): Node {
-        return children[0]
-    }
+    fun getKid(): Node = children[0]
 
 }
