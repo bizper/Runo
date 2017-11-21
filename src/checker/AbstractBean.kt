@@ -19,7 +19,9 @@ open abstract class AbstractBean {
                     cache.children
                             .asSequence()
                             .filter { it.value == value && it.type == Type.ARRAY}
-                            .forEach { cache = it }
+                            .forEach {
+                                cache = it
+                            }
                 }
                 ARRAY_INDEX -> {
                     cache = if(value.contains("[+\\-*/#]+".toRegex())) {
