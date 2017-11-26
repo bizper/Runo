@@ -14,9 +14,7 @@ And search information from this json file, you can use the following code.
 Bean b = p.parse("your json file path");
 b.check("$.elementName");
 b.check("$.elementName.#");//get the length of array
-b.check("$.elementName[#-1]");//get the last element of array
 ```
-support normal operator such as __+ - * /__
 
 all result will be casted to __String__.
 
@@ -30,7 +28,7 @@ command after \# and \* will be ignored.
 :-------:|:---------------:
    $     | root node
    .     |    separator
-  [x]    |x is index of array
+  \[x\]    |x is index of array
    @     |  current node
    \#     | length of element
   \*  | all value in nodes
