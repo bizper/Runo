@@ -34,7 +34,17 @@ open abstract class AbstractBean {
                 ARRAY_ALL_NODE -> {
                     val buffer = StringBuffer()
                     for(n in cache.children) {
-                        buffer.append(if(n.type == Type.STRING) n.value else getInsideString(n))
+                        buffer.append(
+                                if(n.isKid()) n.value
+                                else {
+                                    when {
+                                        n.type == Type.STRING -> "${n.value}:${n.getKid().value}"
+                                        n.type == Type.ARRAY -> getInsideString(n)
+                                        n.type == Type.OBJECT -> getInsideString(n)
+                                        else -> ""
+                                    }
+                                }
+                        )
                         buffer.append(" ")
                     }
                     buffer.deleteCharAt(buffer.lastIndex)
@@ -64,11 +74,11 @@ open abstract class AbstractBean {
 
     private fun getInsideString(start: Node): String {
         val buffer = StringBuffer()
+        buffer.append(start.value)
+        buffer.append(":")
         for(n in start.children) {
-            buffer.append(n.value)
-            buffer.append(':')
-            buffer.append(n.getKid().value)
-            buffer.append(' ')
+            buffer.append(if(n.isKid()) n.value else getInsideString(n))
+            buffer.append(',')
         }
         buffer.deleteCharAt(buffer.lastIndex)
         return buffer.toString()

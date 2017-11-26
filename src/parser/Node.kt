@@ -24,11 +24,12 @@ class Node {
 
     fun getChildren(): Array<Node> = children.toTypedArray()
 
-
     fun add(node: Node) {
         children.add(node)
     }
 
     fun getKid(): Node = children[0]
+
+    fun isKid(): Boolean = children.isEmpty()
 
 }

@@ -18,6 +18,7 @@ class Parser {
 
     private var value_flag = false
     private var log_flag = true
+    private lateinit var bean: Bean
 
     constructor() {
         if(log_flag) {
@@ -31,13 +32,19 @@ class Parser {
         this.log_flag = flag
     }
 
-    constructor(type: String, path: String): this() {
+    constructor(type: String, path: String): this(type, path, false)
+
+    constructor(type: String, path: String, flag: Boolean): this() {
         when(type) {
-            "file" -> parseFile(path)
-            "string" -> parse(path)
+            "file" -> parseFile(path, flag)
+            "string" -> parse(path, flag)
             "url" -> parse(URL(path))
             else -> Log.record(Level.ERROR, "type error")
         }
+    }
+
+    fun getBean(): Bean {
+        return bean
     }
 
     fun parse(string: String): Bean =
@@ -57,7 +64,8 @@ class Parser {
         }
         if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
-        return Bean(root)
+        bean = Bean(root)
+        return bean
     }
 
     fun parseFile(path: String): Bean {
@@ -78,7 +86,8 @@ class Parser {
         }
         if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
-        return Bean(root)
+        bean = Bean(root)
+        return bean
     }
 
     fun parse(url: URL) {

@@ -17,7 +17,7 @@ object Sizable {
             when {
                 isArray(type) -> {
                     buffer.append("\"${field.name}\":[$separator")
-                    val arr = inside as kotlin.Array<Any>
+                    val arr = inside as Array<*>
                     val arr_name = arr.javaClass.componentType.canonicalName
                     println(arr_name)
                     when {
@@ -35,7 +35,7 @@ object Sizable {
                         }
                         else -> {
                             for(a in arr) {
-                                buffer.append(toJSON("", a, height + 1))
+                                buffer.append(toJSON("", a!!, height + 1))
                                 buffer.deleteCharAt(buffer.lastIndex - 1)
                                 buffer.append(",")
                             }

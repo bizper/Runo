@@ -1,9 +1,8 @@
 package UnitTest
 
 import parser.Parser
-import sizable.Sizable
 
 fun main(args: Array<String>) {
-    val netfors = test()
-    println(Sizable.toJSON("", netfors, 0))
+    val b = Parser("file", "./test.json", true).getBean()
+    println(b.check("$.test_array[3]"))
 }
