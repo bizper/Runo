@@ -5,6 +5,44 @@ import java.util.*
 
 object Expr {
 
+	/*
+		support search sentences:
+		{
+			"plrs":{
+				"age":18,
+				"location":"nanjing"
+			},
+			"jeson":{
+				"age":38,
+				"location":"shanghai"
+			},
+			"kive":{
+				"age":50,
+				"location":"newyork"
+			}
+		}
+		using follow sentences:
+		"$.*.age(>20)"
+		Prints:
+			["jeson", "Kive"]//get an array
+		"$.*.age(>20).location"
+		Prints:
+			["shanghai", "newyork"]
+		"$.*(#>4)"
+		Prints:
+			"jeson"
+		"$.*(#>4).location"
+		Prints:
+			"shanghai"
+		"$.*(~=je)"
+		Prints:
+			"jeson"
+		"$.*(==je)"
+		Prints:
+			"Null"
+		"$.*(!=jeson)" Prints:["plrs", "kive"]
+	*/
+
     private val       root_name = "root"
     private val     root_symbol = "$"
     private val    current_node = "@"
