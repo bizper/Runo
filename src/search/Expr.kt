@@ -22,10 +22,10 @@ object Expr {
 			}
 		}
 		using follow sentences:
-		"$.*.age(>20)"
+		"$.age(>20)"
 		Prints:
 			["jeson", "Kive"]//get an array
-		"$.*.age(>20).location"
+		"$.age(>20).location"
 		Prints:
 			["shanghai", "newyork"]
 		"$.*(#>4)"
@@ -40,7 +40,15 @@ object Expr {
 		"$.*(==je)"
 		Prints:
 			"Null"
-		"$.*(!=jeson)" Prints:["plrs", "kive"]
+		"$.*(!=jeson)"
+		Prints:
+			["plrs", "kive"]
+		"$.*(!=je)"
+		Prints:
+			["plrs", "jeson", "kive"]
+		"$.*(~!=je)"
+		Prints:
+			["plrs", "kive]
 	*/
 
     private val       root_name = "root"
@@ -49,6 +57,7 @@ object Expr {
     private val  element_length = "#"
     private val        all_node = "*"
     private val     array_regex = "([\\w\\W]+)\\[([\\w#\\-+*/]+)]".toRegex()
+	private val confident_regex = "([\\w\\W]+)(\\([\\w\\W><=!~]+\\))".toRegex()
 
     fun parseExpr(expr: String): ArrayList<ExprPack> {
         var command = ArrayList<ExprPack>()
