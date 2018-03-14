@@ -21,19 +21,13 @@ object Expr {
 				"location":"newyork"
 			}
 		}
-		using follow sentences:
+		use following sentences:
 		"$.age(>20)"
 		Prints:
 			["jeson", "Kive"]//get an array
 		"$.age(>20).location"
 		Prints:
 			["shanghai", "newyork"]
-		"$.*(#>4)"
-		Prints:
-			"jeson"
-		"$.*(#>4).location"
-		Prints:
-			"shanghai"
 		"$.*(~=je)"
 		Prints:
 			"jeson"
@@ -48,16 +42,15 @@ object Expr {
 			["plrs", "jeson", "kive"]
 		"$.*(~!=je)"
 		Prints:
-			["plrs", "kive]
+			["plrs", "kive"]
 	*/
 
     private val       root_name = "root"
     private val     root_symbol = "$"
-    private val    current_node = "@"
     private val  element_length = "#"
     private val        all_node = "*"
     private val     array_regex = "([\\w\\W]+)\\[([\\w#\\-+*/]+)]".toRegex()
-	private val confident_regex = "([\\w\\W]+)(\\([\\w\\W><=!~]+\\))".toRegex()
+	private val confident_regex = "([\\w\\W]+)\\((==|!=|~=|~!=|>=|<=|<|>)([\\w\\W^><=!~]+)\\)".toRegex()
 
     fun parseExpr(expr: String): ArrayList<ExprPack> {
         var command = ArrayList<ExprPack>()
@@ -69,6 +62,12 @@ object Expr {
                     val arrIndex = parseArrayIndex(i)
                     command.add(ExprPack(ARRAY, arrIndex[0]))
                     command.add(ExprPack(ARRAY_INDEX, arrIndex[1]))
+                }
+                i.matches(confident_regex) -> {
+                    val comList = confident_regex.findAll(i).toList().flatMap(MatchResult::groupValues).toTypedArray()
+                    command.add(parseConditionName(comList[1]))
+                    command.add(ExprPack(NODE_CONDITION_OPERATOR, comList[2]))
+                    command.add(ExprPack(NODE_CONDITION, comList[3]))
                 }
                 i == element_length -> {
                     command.add(ExprPack(LENGTH, element_length))
@@ -84,12 +83,18 @@ object Expr {
         return command
     }
 
+    private fun parseConditionName(key: String): ExprPack {
+        return when(key) {
+            all_node -> ExprPack(ARRAY_ALL_NODE, all_node)
+            else -> ExprPack(CHECK_STRING, key)
+        }
+    }
+
     private fun parseArrayIndex(string: String): Array<String> =
         parseCalIndex(array_regex.findAll(string).toList().flatMap(MatchResult::groupValues).toTypedArray())
 
 
-    private fun parseCalIndex(list: Array<Any>): Array<String> =
-        arrayOf(list[1].toString(), list[2].toString())
+    private fun parseCalIndex(list: Array<Any>): Array<String> = arrayOf(list[1].toString(), list[2].toString())
 
 
     fun parseCalExpr(string: String, length: Int): Int {
@@ -97,6 +102,7 @@ object Expr {
         val stack = ArrayList<Char>()
         val num = ArrayList<Int>()
         val buffer = StringBuffer()
+        //解析计算式
         for(c in string) {
             when(c) {
                 '#' -> num.add(length)
@@ -133,6 +139,7 @@ object Expr {
                 }
             }
         }
+        //如果字符串不为空，将结尾部分的字符加入计算式
         if(!buffer.isBlank()) {
             num.add(buffer.toString().toInt())
             buffer.delete(0, buffer.length)

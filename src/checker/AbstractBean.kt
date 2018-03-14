@@ -4,6 +4,7 @@ import search.*
 import search.ExprType.*
 import parser.Node
 import parser.Type
+import resource.Content
 
 open abstract class AbstractBean {
 
@@ -26,7 +27,7 @@ open abstract class AbstractBean {
                 ARRAY_INDEX -> {
                     cache = if(value.contains("[+\\-*/#]+".toRegex())) {
                         val index = Expr.parseCalExpr(value, cache.children.size)
-                        if(index >= cache.children.size || index < 0) getNullNode(cache)
+                        if(index >= cache.children.size || index < 0) Content.getNullNode(cache)
                         else if(cache.children[index].type != Type.STRING) Node(cache, getInsideString(cache.children[index])) else cache.children[index]
                     }
                     else if(cache.children[value.toInt()].type != Type.STRING) Node(cache, getInsideString(cache.children[value.toInt()])) else cache.children[value.toInt()]
@@ -70,7 +71,58 @@ open abstract class AbstractBean {
         return cache.value
     }
 
-    private fun getNullNode(parent: Node): Node = Node(parent, "Null")
+    fun checkForDoubleArray(key: String): ArrayList<Double> {
+        val keys = Expr.parseExpr(key)
+        var cache = root
+        var list = ArrayList<Double>()
+        var index = 0
+        for((key, value) in keys) {
+            index++
+            when(key) {
+                ROOT -> while(cache.parent != null) {cache = cache.parent!!}
+                CHECK_STRING -> {
+                    cache.children
+                            .asSequence()
+                            .filter { it.value == value }
+                            .forEach {
+                                if(it.type == Type.OBJECT || it.type == Type.ARRAY) {
+                                    if(index == keys.size) {
+                                        cache = it
+                                        list =  getDoubleArray(cache)
+                                    } else {
+                                        cache = it
+                                    }
+                                } else if(it.type == Type.STRING) {
+                                    cache = it.getKid()
+                                }
+                            }
+                }
+                ARRAY_INDEX -> {
+                    cache = if(value.contains("[+\\-*/#]+".toRegex())) {
+                        val index = Expr.parseCalExpr(value, cache.children.size)
+                        if(index >= cache.children.size || index < 0) Content.getNullNode(cache)
+                        else if(cache.children[index].type != Type.STRING) Node(cache, getInsideString(cache.children[index])) else cache.children[index]
+                    }
+                    else if(cache.children[value.toInt()].type != Type.STRING) Node(cache, getInsideString(cache.children[value.toInt()])) else cache.children[value.toInt()]
+                }
+            }
+        }
+        return list
+    }
+
+    private fun isDouble(str: String): Boolean {
+        return "[0-9]+\\.[0-9]+".toRegex().matches(str)
+    }
+
+    private fun getDoubleArray(node: Node): ArrayList<Double> {
+        val list = ArrayList<Double>()
+        node.children.filter {
+            isDouble(it.value)
+        }.mapTo(list) {
+                    it.value.toDouble()
+                }
+        return list
+    }
 
     private fun getInsideString(start: Node): String {
         val buffer = StringBuffer()

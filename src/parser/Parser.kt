@@ -9,6 +9,18 @@ import java.net.URL
 
 class Parser {
 
+    enum class JSONType {
+        JSON,
+        FILE,
+        URL
+    }
+
+    companion object {
+        val JSON = JSONType.JSON
+        val FILE = JSONType.FILE
+        val URL = JSONType.URL
+    }
+
     private var stream: String = ""
     private var pointer = 0
     private var length = 0
@@ -22,8 +34,6 @@ class Parser {
 
     constructor() {
         if(log_flag) {
-            Log.mode(Log.DETAIL)//使用DETAIL模式
-            Log.addUnrecordedLevel(Level.NORMAL)//NORMAL级别的log将不会被记录
             Log.record(Level.INFO, "PARSER INITIALIZED")
         }
     }
@@ -32,13 +42,13 @@ class Parser {
         this.log_flag = flag
     }
 
-    constructor(type: String, path: String): this(type, path, false)
+    constructor(type: JSONType, path: String): this(type, path, false)
 
-    constructor(type: String, path: String, flag: Boolean): this() {
+    constructor(type: JSONType, path: String, flag: Boolean): this() {
         when(type) {
-            "file" -> parseFile(path, flag)
-            "string" -> parse(path, flag)
-            "url" -> parse(URL(path))
+            FILE -> parseFile(path, flag)
+            JSON -> parse(path, flag)
+            URL -> parse(URL(path))
             else -> Log.record(Level.ERROR, "type error")
         }
     }
@@ -99,7 +109,6 @@ class Parser {
             State.PARSE_EXPECT_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
             State.PARSE_INVALID_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
             State.PARSE_ROOT_NOT_SINGULAR -> if(log_flag) Log.record(Level.WARN, sp) else println(sp)
-            State.PARSE_SUCCESS -> if(log_flag) Log.record(Level.NORMAL, sp) else println(sp)
         }
     }
 

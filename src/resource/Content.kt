@@ -1,5 +1,7 @@
 package resource
 
+import parser.Node
+
 object Content {
 
     fun isWhiteSpace(ws: Char): Boolean {
@@ -24,5 +26,7 @@ object Content {
     fun isEnd(char: Char): Boolean {
         return (char == ',') || (char == '}') || (char == ']')
     }
+
+    fun getNullNode(parent: Node): Node = Node(parent, "Null")
 
 }

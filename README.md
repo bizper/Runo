@@ -29,6 +29,5 @@ command after \# and \* will be ignored.
    $     | root node
    .     |    separator
   \[x\]    |x is index of array
-   @     |  current node
    \#     | length of element
   \*  | all value in nodes

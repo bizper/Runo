@@ -19,7 +19,6 @@ object Sizable {
                     buffer.append("\"${field.name}\":[$separator")
                     val arr = inside as Array<*>
                     val arr_name = arr.javaClass.componentType.canonicalName
-                    println(arr_name)
                     when {
                         string_class.contains(arr_name) -> {
                             for(a in arr) {
