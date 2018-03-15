@@ -129,7 +129,7 @@ class Parser {
         } else if(c == ',') {
             parseComma()
         } else {
-            if(c in keywords) return Sp(State.PARSE_SUCCESS, Type.KEYWORDS, c)
+            if(c in keywords) return Sp(State.PARSE_SUCCESS, c)
             else Sp(State.PARSE_EXPECT_VALUE, c)
         }
     }
@@ -159,6 +159,11 @@ class Parser {
 
     private fun parseArray(): Sp {//解析数组
         var point = pointer
+        if(root.type == Type.ARRAY) {
+            val node = Node(root, Type.ARRAY, "")
+            root.add(node)
+            root = node
+        }
         if(root.type == Type.STRING) root.type = Type.ARRAY
         val cache = root
         var i = point
@@ -307,7 +312,7 @@ class Parser {
         return if(Content.isEnd(stream[pointer])) {
             Sp(State.PARSE_INVALID_VALUE, stream[pointer])
         } else {
-            Sp(State.PARSE_SUCCESS, Type.KEYWORDS, stream[pointer])
+            Sp(State.PARSE_SUCCESS, stream[pointer])
         }
     }
 

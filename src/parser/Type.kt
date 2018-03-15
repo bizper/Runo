@@ -8,8 +8,5 @@ enum class Type {
     STRING,
     BOOLEAN,
     NULL,
-    END_DOC,
-    READY_FOR_CHANGE,
-    KEYWORDS
 
 }
