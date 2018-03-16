@@ -41,4 +41,8 @@ class JSONNumber: JSONBase {
         throw TypeErrorException("number can not cast to Null")
     }
 
+    override fun forEach(action: (JSONBase) -> Unit) {
+        action(JSONNumber(num))
+    }
+
 }

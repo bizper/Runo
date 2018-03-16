@@ -37,5 +37,8 @@ class JSONBoolean: JSONBase {
         throw TypeErrorException("boolean can not cast to Array")
     }
 
+    override fun forEach(action: (JSONBase) -> Unit) {
+        action(JSONBoolean(flag))
+    }
 
 }

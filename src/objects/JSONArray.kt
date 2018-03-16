@@ -10,7 +10,7 @@ class JSONArray: JSONBase {
     var list = ArrayList<JSONBase>()
 
     constructor(n: Node) {
-        if(n.type != ARRAY) throw TypeErrorException("non-array node can not be array")
+        if(n.type != ARRAY) throw TypeErrorException("non-array node can not be JSONArray")
         else {
             this.name = n.value
             n.children.forEach {
@@ -54,8 +54,8 @@ class JSONArray: JSONBase {
         return list.toTypedArray()
     }
 
-    fun forEach(action:(JSONBase) -> Unit) {
-        for(element in list) action(element)
+    override fun forEach(action:(JSONBase) -> Unit) {
+        list.forEach(action)
     }
 
 }

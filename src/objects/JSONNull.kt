@@ -28,4 +28,8 @@ class JSONNull: JSONBase {
         return "null"
     }
 
+    override fun forEach(action: (JSONBase) -> Unit) {
+        throw TypeErrorException("Null don't have any elements for action")
+    }
+
 }

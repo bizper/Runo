@@ -1,5 +1,7 @@
 package objects
 
+import objects.error.TypeErrorException
+
 interface JSONBase {
 
     fun toArray(): Array<JSONBase>
@@ -14,5 +16,6 @@ interface JSONBase {
 
     fun toNull(): String
 
+    fun forEach(action:(JSONBase) -> Unit)
 
 }

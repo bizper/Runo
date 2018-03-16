@@ -23,9 +23,7 @@ abstract class AbstractBean {
                     cache.getChildren().filter {
                         it.value == node.value
                     }.forEach {
-                        if(it.type == OBJECT) cache = it
-                        if(it.type == Type.ARRAY) cache = it
-                        if(it.type == STRING) cache = it.getKid()
+                        cache = it
                     }
                 }
                 ExprType.ARRAY -> {
@@ -54,6 +52,14 @@ abstract class AbstractBean {
 
     fun checkForBoolean(str: String): JSONBoolean {
         return JSONBoolean(check(str))
+    }
+
+    fun checkForString(str: String): JSONString {
+        return JSONString(check(str))
+    }
+
+    fun checkForObject(str: String): JSONObject {
+        return JSONObject(check(str))
     }
 
 }

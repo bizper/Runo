@@ -37,4 +37,8 @@ class JSONString: JSONBase {
         throw TypeErrorException("string can not cast to Null")
     }
 
+    override fun forEach(action: (JSONBase) -> Unit) {
+        action(JSONString(str))
+    }
+
 }

@@ -7,17 +7,15 @@ import java.util.*
 
 class JSONObject: JSONBase {
 
-    val name: String
     val table = Hashtable<JSONBase, JSONBase>()
 
     constructor(n: Node) {
         if(n.type != OBJECT) throw TypeErrorException("non-object node can not cast to JSONObject")
-        name = n.value
         n.children.forEach {
             when(it.type) {
                 OBJECT -> table[JSONString(it.value)] = JSONObject(it)
                 ARRAY -> table[JSONString(it.value)] = JSONArray(it)
-                STRING -> table[JSONString(it.value)] = getRightJSONObject(n.getKid())
+                STRING -> table[JSONString(it.value)] = getRightJSONObject(it.getKid())
             }
         }
     }
@@ -35,7 +33,11 @@ class JSONObject: JSONBase {
     }
 
     override fun toString(): String {
-        return name
+        val sb = StringBuffer()
+        table.forEach {
+            sb.append(it.key.toString()).append(":").append(it.value).appendln()
+        }
+        return sb.toString()
     }
 
     override fun toBoolean(): Boolean {
@@ -55,6 +57,10 @@ class JSONObject: JSONBase {
             BOOLEAN -> JSONBoolean(n)
             NULL -> JSONNull()
         }
+    }
+
+    override fun forEach(action:(JSONBase) -> Unit) {
+        table.keys.forEach(action)
     }
 
 }
