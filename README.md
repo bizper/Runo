@@ -1,6 +1,4 @@
-# USER ATTENTION
-
-To use this software, you need to import the **runo** jar file.
+# USER GUIDE
 
 This software written by _KOTLIN_.
 
@@ -19,13 +17,10 @@ Bean b = p.parse("your json file path");
 b.check("$.elementName");
 b.check("$.elementName.#");//get the length of array
 b.check("$.arrayName[0]");//get the first elements in array
+b.checkForArray("$.arrayName");//get the array
 ```
 
-all result will be casted to __String__.
-
-out of array index will get __"Null"__.
-
-command after \# and \* will be ignored.
+all result will be casted to __JSONBase__.
 
 ###### SEARCH SYNTAX
 
