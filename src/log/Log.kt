@@ -19,4 +19,8 @@ object Log {
         println("[${level.name}] ${sp.state} ${sp.string}")
     }
 
+    fun record(obj: Any, str: String) {
+        println("[$obj] str")
+    }
+
 }

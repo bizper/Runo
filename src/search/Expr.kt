@@ -1,5 +1,6 @@
 package search
 
+import log.Log
 import search.ExprType.*
 import java.util.*
 
@@ -22,10 +23,10 @@ object Expr {
 			}
 		}
 		use following sentences:
-		"$.age(>20)"
+		"$.*.age(>20)"
 		Prints:
 			["jeson", "Kive"]//get an array
-		"$.age(>20).location"
+		"$.*.age(>20).location"
 		Prints:
 			["shanghai", "newyork"]
 		"$.*(~=je)"
@@ -136,6 +137,9 @@ object Expr {
                         buffer.delete(0, buffer.length)
                     }
                     stack.add(c)
+                }
+                else -> {
+                    Log.record(this, "illegal character")
                 }
             }
         }
