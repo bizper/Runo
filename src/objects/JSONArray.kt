@@ -10,7 +10,7 @@ class JSONArray: JSONBase {
     var list = ArrayList<JSONBase>()
 
     constructor(n: Node) {
-        if(n.type != ARRAY) throw TypeErrorException("non-array node can not be JSONArray")
+        if(n.type != ARRAY) throw TypeErrorException("non-array node can not be casted to JSONArray")
         else {
             this.name = n.value
             n.children.forEach {
@@ -39,6 +39,8 @@ class JSONArray: JSONBase {
         list.forEach {
             sb.append(it).append(" ")
         }
+        sb.deleteCharAt(sb.length - 1)
+        sb.appendln()
         return sb.toString()
     }
 
