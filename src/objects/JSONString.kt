@@ -18,11 +18,11 @@ class JSONString: JSONBase {
     }
 
     override fun toInt(): Int {
-        throw TypeErrorException("string can not cast to Int")
+        return str.toInt()
     }
 
     override fun toDouble(): Double {
-        throw TypeErrorException("string can not cast to Double")
+        return str.toDouble()
     }
 
     override fun toString(): String {
@@ -30,7 +30,7 @@ class JSONString: JSONBase {
     }
 
     override fun toBoolean(): Boolean {
-        throw TypeErrorException("string can not cast to Boolean")
+        return str.toBoolean()
     }
 
     override fun toNull(): String {

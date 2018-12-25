@@ -1,6 +1,5 @@
 package parser
 
-import checker.Bean
 import log.*
 import log.Log.Level
 import resource.*
@@ -30,7 +29,6 @@ class Parser {
 
     private var value_flag = false
     private var log_flag = true
-    private lateinit var bean: Bean
 
     constructor() {
         if(log_flag) {
@@ -53,15 +51,7 @@ class Parser {
         }
     }
 
-    fun getBean(): Bean {
-        return bean
-    }
-
-    fun parse(string: String): Bean =
-        parse(string, false)
-
-
-    fun parse(string: String, isDebug: Boolean): Bean {
+    fun parse(string: String, isDebug: Boolean) {
         if(log_flag) {
             Log.record(Level.INFO, "input string: $string")
             Log.record(Level.INFO, "start parsing...")
@@ -74,19 +64,17 @@ class Parser {
         }
         if(isDebug) print(root, 0)
         if(log_flag) Log.record(Level.INFO, "parse complete")
-        bean = Bean(root)
-        return bean
     }
 
-    fun parseFile(path: String): Bean {
+    fun parseFile(path: String) {
         return parseFile(path, false)
     }
 
-    fun parseFile(path: String, isDebug: Boolean): Bean {
+    fun parseFile(path: String, isDebug: Boolean) {
         val file = File(path)
         if(log_flag) {
-            Log.record(Level.INFO, "input file: ${file.canonicalPath}")
-            Log.record(Level.INFO, "start parsing...")
+            Log.info("input file: ${file.canonicalPath}")
+            Log.info("start parsing...")
         }
         pointer = 0
         stream = file.readText()
@@ -95,9 +83,7 @@ class Parser {
             stateLog(parse(stream[pointer]))
         }
         if(isDebug) print(root, 0)
-        if(log_flag) Log.record(Level.INFO, "parse complete")
-        bean = Bean(root)
-        return bean
+        if(log_flag) Log.info("parse complete")
     }
 
     fun parse(url: URL) {

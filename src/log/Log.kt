@@ -12,11 +12,22 @@ object Log {
     }
 
     fun record(level: Level, str: String) {
-        println("[${level.name}] $str")
+        if(level == Level.ERROR || level == Level.WARN) System.err.println("[${level.name}] $str")
+        else println("[${level.name}] $str")
     }
 
     fun record(level: Level, sp: Sp) {
-        println("[${level.name}] ${sp.state} ${sp.string}")
+        if(level == Level.ERROR || level == Level.WARN) System.err.println("[${level.name}] ${sp.state} ${sp.string}")
+        else println("[${level.name}] ${sp.state} ${sp.string}")
+
+    }
+
+    fun info(sp: Sp) {
+        record(Level.INFO, sp)
+    }
+
+    fun info(str: String) {
+        record(Level.INFO, str)
     }
 
     fun record(obj: Any, str: String) {

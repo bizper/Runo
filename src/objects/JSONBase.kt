@@ -1,7 +1,5 @@
 package objects
 
-import objects.error.TypeErrorException
-
 interface JSONBase {
 
     fun toArray(): Array<JSONBase>
