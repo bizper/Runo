@@ -4,7 +4,7 @@ class Node {
 
     var parent: Node? = null
     var value = ""
-    lateinit var type: Type
+    var type: Type
 
     constructor(parent: Node?, type: Type, value: String) {
         this.parent = parent
