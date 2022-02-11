@@ -1,5 +1,6 @@
 import parser.Parser
 
 fun main(args: Array<String>) {
-    Parser(Parser.FILE, "./test.json", true)
+    var p = Parser(Parser.FILE, "./test.json", true)
+
 }

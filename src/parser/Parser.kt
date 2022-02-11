@@ -27,17 +27,17 @@ class Parser {
 
     private val keywords = arrayOf(' ', '{', '[', '}', ']', ',', '\n', ':', '"', '\r')
 
-    private var value_flag = false
-    private var log_flag = true
+    private var valueFlag = false
+    private var logFlag = true
 
     constructor() {
-        if(log_flag) {
+        if(logFlag) {
             Log.record(Level.INFO, "PARSER INITIALIZED")
         }
     }
 
     constructor(flag: Boolean): this() {
-        this.log_flag = flag
+        this.logFlag = flag
     }
 
     constructor(type: JSONType, path: String): this(type, path, false)
@@ -52,7 +52,7 @@ class Parser {
     }
 
     fun parse(string: String, isDebug: Boolean) {
-        if(log_flag) {
+        if(logFlag) {
             Log.record(Level.INFO, "input string: $string")
             Log.record(Level.INFO, "start parsing...")
         }
@@ -63,16 +63,16 @@ class Parser {
             stateLog(parse(stream[pointer]))
         }
         if(isDebug) print(root, 0)
-        if(log_flag) Log.record(Level.INFO, "parse complete")
+        if(logFlag) Log.record(Level.INFO, "parse complete")
     }
 
     fun parseFile(path: String) {
         return parseFile(path, false)
     }
 
-    fun parseFile(path: String, isDebug: Boolean) {
+    private fun parseFile(path: String, isDebug: Boolean) {
         val file = File(path)
-        if(log_flag) {
+        if(logFlag) {
             Log.info("input file: ${file.canonicalPath}")
             Log.info("start parsing...")
         }
@@ -83,18 +83,18 @@ class Parser {
             stateLog(parse(stream[pointer]))
         }
         if(isDebug) print(root, 0)
-        if(log_flag) Log.info("parse complete")
+        if(logFlag) Log.info("parse complete")
     }
 
-    fun parse(url: URL) {
+    private fun parse(url: URL) {
         //TODO
     }
 
     private fun stateLog(sp: Sp) {
         when(sp.state) {
-            State.PARSE_EXPECT_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
-            State.PARSE_INVALID_VALUE -> if(log_flag) Log.record(Level.ERROR, sp) else println(sp)
-            State.PARSE_ROOT_NOT_SINGULAR -> if(log_flag) Log.record(Level.WARN, sp) else println(sp)
+            State.PARSE_EXPECT_VALUE -> if(logFlag) Log.record(Level.ERROR, sp) else println(sp)
+            State.PARSE_INVALID_VALUE -> if(logFlag) Log.record(Level.ERROR, sp) else println(sp)
+            State.PARSE_ROOT_NOT_SINGULAR -> if(logFlag) Log.record(Level.WARN, sp) else println(sp)
         }
     }
 
@@ -128,7 +128,7 @@ class Parser {
             root = node
         }
         if(root.type == Type.STRING) root.type = Type.OBJECT
-        value_flag = false
+        valueFlag = false
         var i = point
         while(true) {
             if(stream[i] == '}') {
@@ -158,14 +158,14 @@ class Parser {
                 point = pointer
                 break
             }
-            value_flag = true//add buffer as value in array
+            valueFlag = true//add buffer as value in array
             root = cache
             stateLog(parse(stream[i]))
             i = pointer
         }
         pointer = point + 1
         root = if(root.parent == null) root else root.parent!!
-        value_flag = false//reset value flag
+        valueFlag = false//reset value flag
         return Sp(State.PARSE_SUCCESS, Type.ARRAY)
     }
 
@@ -178,16 +178,16 @@ class Parser {
                     buffer += stream[it]
                     point = it
                 }
-        if(!value_flag) {
+        if(!valueFlag) {
             val node = Node(root, Type.STRING, buffer.trim())
             root.add(node)
             root = node
-            value_flag = !value_flag
+            valueFlag = !valueFlag
         } else {
             val node = Node(root, Type.STRING, buffer.trim())
             root.add(node)
             root = if(root.parent == null) root else root.parent!!
-            value_flag = !value_flag
+            valueFlag = !valueFlag
         }
         pointer = point + 2//shift the pointer to the location where behind the next quote.
         return Sp(State.PARSE_SUCCESS, buffer)
@@ -204,14 +204,14 @@ class Parser {
                         point = it
                     }
                 }
-        if(!value_flag) {
-            value_flag = !value_flag
+        if(!valueFlag) {
+            valueFlag = !valueFlag
             return Sp(State.PARSE_INVALID_VALUE, Type.BOOLEAN, "${buffer.trim()} can not be key")
         } else {
             val node = Node(root, Type.BOOLEAN, buffer.trim())
             root.add(node)
             root = if(root.parent == null) root else root.parent!!
-            value_flag = !value_flag
+            valueFlag = !valueFlag
         }
         pointer = point + 1
         return if(buffer == "true" || buffer == "false") {
@@ -233,14 +233,14 @@ class Parser {
                 }
         }
         buffer = buffer.trim()
-        if(!value_flag) {
-            value_flag = !value_flag
+        if(!valueFlag) {
+            valueFlag = !valueFlag
             return Sp(State.PARSE_INVALID_VALUE, Type.NUMBER, "$buffer can not be key")
         } else {
             val node = Node(root, Type.NUMBER, buffer)
             root.add(node)
             root = if(root.parent == null) root else root.parent!!
-            value_flag = !value_flag
+            valueFlag = !valueFlag
         }
         pointer = point + 1
         return if(!Content.isNumber(buffer)) {//校验数字格式是否正确
@@ -262,14 +262,14 @@ class Parser {
                         point = it
                     }
                 }
-        if(!value_flag) {
-            value_flag = !value_flag
+        if(!valueFlag) {
+            valueFlag = !valueFlag
             return Sp(State.PARSE_INVALID_VALUE, Type.NULL, "${buffer.trim()} can not be key")
         } else {
             val node = Node(root, Type.NULL, buffer.trim())
             root.add(node)
             root = if(root.parent == null) root else root.parent!!
-            value_flag = !value_flag
+            valueFlag = !valueFlag
         }
         pointer = point + 1
         return if(buffer == "null") Sp(State.PARSE_SUCCESS, Type.NULL, buffer.trim())
