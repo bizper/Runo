@@ -1,6 +1,6 @@
 import parser.Parser
+import parser.Parser.JSONType
 
 fun main(args: Array<String>) {
-    var p = Parser(Parser.FILE, "./test.json", true)
-
+    Parser(JSONType.FILE, "./test.json", true)
 }

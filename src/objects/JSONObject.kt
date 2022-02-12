@@ -1,66 +1,55 @@
 package objects
 
-import objects.error.TypeErrorException
+import objects.errors.TypeErrorException
 import parser.Node
-import parser.Type.*
-import java.util.*
+import parser.Type
 
-class JSONObject: JSONBase {
+class JSONObject private constructor() : JSONBase {
 
-    val table = Hashtable<JSONBase, JSONBase>()
+    private constructor(node: Node) : this() {
+        if(node.type != Type.OBJECT_ROOT) throw TypeErrorException("Not OBJECT_ROOT Type with this node ${node.value}")
+    }
 
-    constructor(n: Node) {
-        if(n.type != OBJECT) throw TypeErrorException("non-object node can not cast to JSONObject")
-        n.children.forEach {
-            when(it.type) {
-                OBJECT -> table[JSONString(it.value)] = JSONObject(it)
-                ARRAY -> table[JSONString(it.value)] = JSONArray(it)
-                STRING -> table[JSONString(it.value)] = getRightJSONObject(it.getKid())
-            }
+    private val map = HashMap<String, JSONBase>()
+
+    fun getJSONObject(key: String): JSONObject {
+        val base = map[key]
+        return if(base is JSONObject) base
+        else throw TypeErrorException("Not JSONObject Type with key $key")
+    }
+
+    fun getJSONArray(key: String): JSONArray {
+        val base = map[key]
+        return if(base is JSONArray) base
+        else throw TypeErrorException("Not JSONArray Type with key $key")
+    }
+
+    fun getString(key: String): String {
+        val base = map[key]
+        return if(base is JSONString) base.getString()
+        else throw TypeErrorException("Not JSONString Type with key $key")
+    }
+
+    fun getInt(key: String): Int {
+        val base = map[key]
+        return if(base is JSONNumber) (map[key] as JSONNumber).getInt()
+        else throw TypeErrorException("Not JSONNumber Type with key $key")
+    }
+
+    fun getDouble(key: String): Double {
+        val base = map[key]
+        return if(base is JSONNumber) (map[key] as JSONNumber).getDouble()
+        else throw TypeErrorException("Not JSONNumber Type with key $key")
+    }
+
+    companion object {
+        fun getJSONObject(): JSONObject {
+            return JSONObject()
         }
-    }
 
-    override fun toArray(): Array<JSONBase> {
-        return table.keys.toTypedArray()
-    }
-
-    override fun toInt(): Int {
-        throw TypeErrorException("object can not cast to int")
-    }
-
-    override fun toDouble(): Double {
-        throw TypeErrorException("object can not cast to double")
-    }
-
-    override fun toString(): String {
-        val sb = StringBuffer()
-        table.forEach {
-            sb.append(it.key.toString()).append(":").append(it.value).appendln()
+        fun getJSONObject(node: Node): JSONObject {
+            return JSONObject(node)
         }
-        return sb.toString()
-    }
-
-    override fun toBoolean(): Boolean {
-        throw TypeErrorException("object can not cast to boolean")
-    }
-
-    override fun toNull(): String {
-        throw TypeErrorException("object can not cast to null")
-    }
-
-    private fun getRightJSONObject(n: Node): JSONBase {
-        return when(n.type) {
-            STRING -> JSONString(n.value)
-            OBJECT -> JSONObject(n)
-            ARRAY -> JSONArray(n)
-            NUMBER -> JSONNumber(n)
-            BOOLEAN -> JSONBoolean(n)
-            NULL -> JSONNull()
-        }
-    }
-
-    override fun forEach(action:(JSONBase) -> Unit) {
-        table.keys.forEach(action)
     }
 
 }

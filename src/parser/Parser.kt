@@ -23,7 +23,7 @@ class Parser {
     private var stream: String = ""
     private var pointer = 0
     private var length = 0
-    private var root = Node(Type.OBJECT, "")
+    private var root = Node(Type.OBJECT_ROOT, "root")
 
     private val keywords = arrayOf(' ', '{', '[', '}', ']', ',', '\n', ':', '"', '\r')
 
@@ -51,7 +51,9 @@ class Parser {
         }
     }
 
-    fun parse(string: String, isDebug: Boolean) {
+    fun getBean() = root
+
+    private fun parse(string: String, isDebug: Boolean) {
         if(logFlag) {
             Log.record(Level.INFO, "input string: $string")
             Log.record(Level.INFO, "start parsing...")
@@ -92,7 +94,7 @@ class Parser {
 
     private fun stateLog(sp: Sp) {
         when(sp.state) {
-            State.PARSE_EXPECT_VALUE -> if(logFlag) Log.record(Level.ERROR, sp) else println(sp)
+            State.PARSE_NOT_EXPECT_VALUE -> if(logFlag) Log.record(Level.ERROR, sp) else println(sp)
             State.PARSE_INVALID_VALUE -> if(logFlag) Log.record(Level.ERROR, sp) else println(sp)
             State.PARSE_ROOT_NOT_SINGULAR -> if(logFlag) Log.record(Level.WARN, sp) else println(sp)
         }
@@ -116,7 +118,7 @@ class Parser {
             parseComma()
         } else {
             if(c in keywords) return Sp(State.PARSE_SUCCESS, c)
-            else Sp(State.PARSE_EXPECT_VALUE, c)
+            else Sp(State.PARSE_NOT_EXPECT_VALUE, c)
         }
     }
 

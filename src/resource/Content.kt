@@ -29,6 +29,4 @@ object Content {
         return (char == ',') || (char == '}') || (char == ']')
     }
 
-    fun getNullNode(parent: Node): Node = Node(parent, "Null")
-
 }

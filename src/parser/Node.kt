@@ -13,6 +13,7 @@ class Node {
     }
 
     constructor(type: Type,value: String): this(null, type, value)
+
     constructor(parent: Node, value: String): this(parent, Type.NULL, value)
 
     var children = ArrayList<Node>()
